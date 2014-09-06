@@ -1,3 +1,4 @@
+<div id="pie" class="epoch" style="width: 400px; height: 400px"></div>
 <script>
   pubnub.subscribe({
     channel: 'iot_hackathon',
@@ -5,7 +6,7 @@
       pubnub.history({
         channel: 'iot_hackathon',
         count: 100,
-        callback: compute_aggregate_preference
+        callback: function(r) { update_epoch(EPOCH_OBJECTS.pie, compute_aggregate_preference(r)) }
       });
     }
   });
@@ -22,8 +23,28 @@
       latest_prefs[msg.device_id] = msg.pref;
     }
     // Tally up the count
+    var louder_count = 0, quieter_count = 0;
+
     for (device_id in latest_prefs) {
-      console.log(device_id + ' prefers ' + (latest_prefs[device_id].pref > 0 ? "LOUDER" : "QUIETER"));
+      if (latest_prefs[device_id] > 0) {
+        louder_count += 1;
+      } else {
+        quieter_count += 1;
+      }
     }
+
+    return [
+      { label: "Louder please!", value: louder_count },
+      { label: "Quieter please!", value: quieter_count }
+    ];
   };
+
+  function update_epoch(pie_epoch, data) {
+    pie_epoch.update(data);
+  }
+
+  // initializing stuff
+  var EPOCH_OBJECTS = {
+    pie: $("#pie").epoch( { type: "pie", data: [ { label: ":-)", value: 1 } ] } )
+  }
 </script>
