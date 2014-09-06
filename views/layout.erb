@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="http://cdn.pubnub.com/pubnub.min.js"></script>
+  </head>
+  <body>
+    <script>
+      var pubnub = PUBNUB.init({
+        publish_key:   'pub-c-ee09f7e5-2bdf-4573-ac06-6148cf772de6',
+        subscribe_key: 'sub-c-0672ac1e-35f1-11e4-afa1-02ee2ddab7fe'
+      });
+    </script>
+    <%=yield%>
+  </body>
+</html>

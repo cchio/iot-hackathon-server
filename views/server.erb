@@ -1,0 +1,8 @@
+<script>
+  pubnub.subscribe({
+    channel: 'iot_hackathon',
+    message: function(msg) {
+      console.log(msg);
+    }
+  });
+</script>
