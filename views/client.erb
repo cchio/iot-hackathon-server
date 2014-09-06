@@ -3,7 +3,8 @@
   pubnub.publish({
     channel: 'iot_hackathon',
     message: { pref: Math.floor(Math.random()*num_prefs),
-               device_id: '<%=@uuid%>'
+               device_id: '<%=@uuid%>',
+               ts_milli: Date.now()
              }
   })
 </script>

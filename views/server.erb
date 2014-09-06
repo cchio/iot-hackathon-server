@@ -1,8 +1,29 @@
 <script>
   pubnub.subscribe({
     channel: 'iot_hackathon',
-    message: function(msg) {
-      console.log(msg.device_id + ' thinks ' + (msg.pref > 0 ? 'LOUD' : 'QUIET'));
+    message: function() {
+      pubnub.history({
+        channel: 'iot_hackathon',
+        count: 100,
+        callback: compute_aggregate_preference
+      });
     }
   });
+
+  function compute_aggregate_preference(response) {
+    var msg, msgs, ii, latest_prefs;
+    // response looks like [payloads, end_token, start_token]
+    // c.f. http://www.pubnub.com/docs/javascript/tutorial/storage-playback.html
+    msgs = response[0];
+    latest_prefs = {}; 
+    // Get the latest prefs per device_id
+    for (ii = 0; ii < msgs.length; ii++) {
+      msg = msgs[ii];
+      latest_prefs[msg.device_id] = msg.pref;
+    }
+    // Tally up the count
+    for (device_id in latest_prefs) {
+      console.log(device_id + ' prefers ' + (latest_prefs[device_id].pref > 0 ? "LOUDER" : "QUIETER"));
+    }
+  };
 </script>
