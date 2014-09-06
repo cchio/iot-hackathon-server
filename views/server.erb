@@ -6,16 +6,20 @@
       pubnub.history({
         channel: 'iot_hackathon',
         count: 100,
-        callback: function(r) { update_epoch(EPOCH_OBJECTS.pie, compute_aggregate_preference(r)) }
+        callback: update_main
       });
     }
   });
 
-  function compute_aggregate_preference(response) {
-    var msg, msgs, ii, latest_prefs;
+  function update_main(pubnub_response) {
     // response looks like [payloads, end_token, start_token]
     // c.f. http://www.pubnub.com/docs/javascript/tutorial/storage-playback.html
-    msgs = response[0];
+    msgs = pubnub_response[0];
+    EPOCH_OBJECTS.pie.update(compute_aggregate_preference(msgs));
+  }
+
+  function compute_aggregate_preference(msgs) {
+    var msg, ii, latest_prefs;
     latest_prefs = {}; 
     // Get the latest prefs per device_id
     for (ii = 0; ii < msgs.length; ii++) {
@@ -39,9 +43,6 @@
     ];
   };
 
-  function update_epoch(pie_epoch, data) {
-    pie_epoch.update(data);
-  }
 
   // initializing stuff
   var EPOCH_OBJECTS = {
