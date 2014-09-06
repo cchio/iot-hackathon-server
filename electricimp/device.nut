@@ -127,9 +127,17 @@ function readAccelG() {
     imp.wakeup(1, readAccelG);
 }
 
+function lightLed(ledNumbers) {
+    // DO SOMETHING THAT LIGHTS THE RELEVANT LIGHTS UP
+    server.log("called lightLed but not yet lighting any LEDs");
+}
+
+function incomingMajorityFeedbackHandler(majorityFeedback) {
+    lightLed(majorityFeedback);
+}
+
 accel <- MMA8452(hardware.i2c89);
 accel.wake();
 
-// agent.on("sendAccelArray", outgoingAccelDataHandler);
-
 readAccelG();
+agent.on("majorityFeedback", incomingMajorityFeedbackHandler);

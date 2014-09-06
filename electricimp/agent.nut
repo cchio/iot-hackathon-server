@@ -335,7 +335,6 @@ function publishToChannel(accelData) {
     local signal = rawDataToSignal(accelData);
 
     if (signal > -1) {
-        
         pubnub.publish(soloChannel, 
                         {   
                             pref = signal,
@@ -344,11 +343,27 @@ function publishToChannel(accelData) {
                         }
                     );
     }
-
 }
+
 
 function incomingAccelDataHandler(accelData) {
     publishToChannel(accelData);
 }
 
+
 device.on("accelData", incomingAccelDataHandler);
+
+// "majority" would be perhaps an array of integers of the majority representations?
+// i.e. [2, 4] might mean TEMPUP, MUSICLOUDER
+pubnub.subscribe([aggrChannel], function(err, result, tt) {
+    if(result != null && aggrChannel in result) {
+        try {
+            local data = http.jsondecode(result[aggrChannel]);
+            if ("majority" in data) {
+                device.send("majorityFeedback", data["majority"]);
+            }
+        } catch(ex) {
+            server.log("Error - " + ex);
+        }            
+    }
+});
