@@ -1,11 +1,12 @@
 <div id="pie" class="epoch" style="width: 400px; height: 400px"></div>
 <script>
+  var DEVICE_ID_FIELD = 'agentId';
   pubnub.subscribe({
-    channel: 'iot_hackathon',
+    channel: 'soloChannel',
     message: function() {
       pubnub.history({
-        channel: 'iot_hackathon',
-        count: 100,
+        channel: 'soloChannel',
+        count: 10,
         callback: update_main
       });
     }
@@ -24,13 +25,13 @@
     // Get the latest prefs per device_id
     for (ii = 0; ii < msgs.length; ii++) {
       msg = msgs[ii];
-      latest_prefs[msg.device_id] = msg.pref;
+      latest_prefs[msg[DEVICE_ID_FIELD]] = msg.pref;
     }
     // Tally up the count
     var louder_count = 0, quieter_count = 0;
-
+    
     for (device_id in latest_prefs) {
-      if (latest_prefs[device_id] > 0) {
+      if (latest_prefs[device_id] > 3) {
         louder_count += 1;
       } else {
         quieter_count += 1;
