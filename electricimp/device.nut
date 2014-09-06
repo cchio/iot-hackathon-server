@@ -113,12 +113,13 @@ class MMA8452 {
     }
 }
 
-// Demo code
+/*
 function readAccel() {
     local data = accel.read();
     server.log(format("x = %i, y = %i, z = %i", data.x, data.y, data.z));
     imp.wakeup(1, readAccel);
 }
+*/
 
 function readAccelG() {
     local data = accel.readG();
@@ -127,16 +128,47 @@ function readAccelG() {
     imp.wakeup(1, readAccelG);
 }
 
-function lightLed(ledNumbers) {
+function displayFeedback() {
+
     // DO SOMETHING THAT LIGHTS THE RELEVANT LIGHTS UP
-    server.log("called lightLed but not yet lighting any LEDs");
+    server.log("called lightLed but not yet lighting LEDs in a meaningful way...");
+
+    local roll;
+    roll = 1.0 * math.rand() / RAND_MAX;
+    roll = roll * 3;
+
+    if (roll.tointeger() == 0) {
+        led2.write(1);
+        led5.write(0);
+        led7.write(0);
+    } else if (roll.tointeger() == 0) {
+        led2.write(0);
+        led5.write(1);
+        led7.write(0);
+    } else {
+        led2.write(0);
+        led5.write(0);
+        led7.write(1);
+    }
+
+    // imp.wakeup(0.5, displayFeedback);
 }
 
-function incomingMajorityFeedbackHandler(majorityFeedback) {
-    lightLed(majorityFeedback);
+function incomingMajorityFeedbackHandler(majorityFeedback) { 
+    displayFeedback(majorityFeedback);
 }
 
 accel <- MMA8452(hardware.i2c89);
+led2 <- hardware.pin2;
+led5 <- hardware.pin5;
+led7 <- hardware.pin7;
+
+led2.configure(DIGITAL_OUT);
+led5.configure(DIGITAL_OUT);
+led7.configure(DIGITAL_OUT);
+
+state <- 0;
+
 accel.wake();
 
 readAccelG();
