@@ -2,7 +2,7 @@
   pubnub.subscribe({
     channel: 'iot_hackathon',
     message: function(msg) {
-      console.log(msg);
+      console.log(msg.device_id + ' thinks ' + (msg.pref > 0 ? 'LOUD' : 'QUIET'));
     }
   });
 </script>
