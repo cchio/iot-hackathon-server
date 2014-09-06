@@ -15,11 +15,17 @@
   function update_main(pubnub_response) {
     // response looks like [payloads, end_token, start_token]
     // c.f. http://www.pubnub.com/docs/javascript/tutorial/storage-playback.html
-    msgs = pubnub_response[0];
-    EPOCH_OBJECTS.pie.update(compute_aggregate_preference(msgs));
+    var msgs = pubnub_response[0];
+    var pref_counts = group_prefs_by_count(compute_latest_prefs(msgs)); 
+    console.log('pref_counts: ' + JSON.stringify(pref_counts));
+    pubnub.publish({
+      channel: 'aggrChannel',
+      message: pref_counts 
+    });
+    //EPOCH_OBJECTS.pie.update(compute_aggregate_preference(msgs));
   }
 
-  function compute_aggregate_preference(msgs) {
+  function compute_latest_prefs(msgs) {
     var msg, ii, latest_prefs;
     latest_prefs = {}; 
     // Get the latest prefs per device_id
@@ -27,8 +33,25 @@
       msg = msgs[ii];
       latest_prefs[msg[DEVICE_ID_FIELD]] = msg.pref;
     }
+    return latest_prefs;
+  };
+
+  function group_prefs_by_count(prefs) {
+    var ii, device_id, pref, pref_counts = [];
+    // initialize
+    for (ii = 0; ii < 6; ii++) {
+      pref_counts[ii] = 0;
+    }
+
+    for (device_id in prefs) {
+      pref = prefs[device_id];
+      pref_counts[pref] += 1;
+    }
+    return pref_counts;
+  }
+
     // Tally up the count
-    var louder_count = 0, quieter_count = 0;
+    /*var louder_count = 0, quieter_count = 0;
     
     for (device_id in latest_prefs) {
       if (latest_prefs[device_id] > 3) {
@@ -42,7 +65,7 @@
       { label: "Louder please!", value: louder_count },
       { label: "Quieter please!", value: quieter_count }
     ];
-  };
+    */
 
 
   // initializing stuff
