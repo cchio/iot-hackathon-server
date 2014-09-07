@@ -121,6 +121,8 @@ function readAccel() {
 }
 */
 
+prevMajority <- -1;
+
 function readAccelG() {
     local data = accel.readG();
     server.log(format("x = %.02f, y = %.02f, z = %.02f", data.x, data.y, data.z));
@@ -128,34 +130,55 @@ function readAccelG() {
     imp.wakeup(1, readAccelG);
 }
 
-function displayFeedback() {
-
-    // DO SOMETHING THAT LIGHTS THE RELEVANT LIGHTS UP
-    server.log("called lightLed but not yet lighting LEDs in a meaningful way...");
-
-    local roll;
-    roll = 1.0 * math.rand() / RAND_MAX;
-    roll = roll * 3;
-
-    if (roll.tointeger() == 0) {
+function displayFeedback(curMajority) {
+    local sleeplag = 0.1;
+    for (local i = 0; i < 5; i++) {
         led2.write(1);
         led5.write(0);
         led7.write(0);
-    } else if (roll.tointeger() == 0) {
+        imp.sleep(sleeplag);
+        led2.write(0);
+        led5.write(1);
+        led7.write(0);
+        imp.sleep(sleeplag);
+        led2.write(0);
+        led5.write(0);
+        led7.write(1);
+        imp.sleep(sleeplag);
+    }
+    
+    for (local i = 0; i < 3; i++) {
+        led2.write(1);
+        led5.write(1);
+        led7.write(1);
+        imp.sleep(sleeplag);
+        led2.write(0);
+        led5.write(0);
+        led7.write(0);
+        imp.sleep(sleeplag);
+    }
+    
+    if (curMajority.tointeger() == 0 || curMajority.tointeger() == 1) {
+        led2.write(0);
+        led5.write(0);
+        led7.write(1);
+    } else if (curMajority.tointeger() == 2 || curMajority.tointeger() == 3) {
         led2.write(0);
         led5.write(1);
         led7.write(0);
     } else {
-        led2.write(0);
+        led2.write(1);
         led5.write(0);
-        led7.write(1);
+        led7.write(0);
     }
-
-    // imp.wakeup(0.5, displayFeedback);
 }
 
-function incomingMajorityFeedbackHandler(majorityFeedback) { 
-    displayFeedback(majorityFeedback);
+function incomingMajorityFeedbackHandler(curMajority) { 
+    server.log(format("CURRENT MAJORITY: %i", curMajority.tointeger()));
+    if (prevMajority != curMajority) {
+        prevMajority = curMajority;
+        displayFeedback(prevMajority);
+    }
 }
 
 accel <- MMA8452(hardware.i2c89);

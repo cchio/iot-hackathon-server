@@ -292,8 +292,8 @@ const ACCEL_THRESHOLD = 0.7;
 channelBase <- split(http.agenturl(), "/").pop();
 soloChannel <- "soloChannel";
 aggrChannel <- "aggrChannel";
-
 pubnub <- PubNub(PUBKEY, SUBKEY, SECRETKEY);
+lastSignal <- 0;
 
 function rawDataToSignal(accelData) {
 
@@ -327,6 +327,7 @@ function rawDataToSignal(accelData) {
         }
     }
     server.log(format("signal = %i", signal));
+    lastSignal = signal;
     return signal;
 }
 
@@ -342,6 +343,7 @@ function publishToChannel(accelData) {
                             timestamp = time()
                         }
                     );
+        server.log(format("%i, %s", signal, channelBase));
     }
 }
 
@@ -353,15 +355,11 @@ function incomingAccelDataHandler(accelData) {
 
 device.on("accelData", incomingAccelDataHandler);
 
-// "majority" would be perhaps an array of integers of the majority representations?
-// i.e. [2, 4] might mean TEMPUP, MUSICLOUDER
 pubnub.subscribe([aggrChannel], function(err, result, tt) {
+    server.log("GOT FEEDBACK");
     if(result != null && aggrChannel in result) {
         try {
-            local data = http.jsondecode(result[aggrChannel]);
-            if ("majority" in data) {
-                device.send("majorityFeedback", data["majority"]);
-            }
+            device.send("majorityFeedback", result[aggrChannel]);
         } catch(ex) {
             server.log("Error - " + ex);
         }            
