@@ -2,12 +2,44 @@
 <div id="area" class="epoch" style="width: 1080px; height: 400px"></div>
 <script>
   var DEVICE_ID_FIELD = 'agentId';
+
+  var update_realtime = (function() {
+    var device_pref_states = {}
+    // closure
+    return function(msg) {
+      var pref_states = [], ii
+      var device_id;
+      var entry = [];
+      var curr_t = Date.now()/1000;
+
+      device_pref_states[msg[DEVICE_ID_FIELD]] = device_pref_states[msg[DEVICE_ID_FIELD]] || 0;
+      device_pref_states[msg[DEVICE_ID_FIELD]] = msg.pref;
+
+      // initialize pref states;
+      for (ii = 0; ii < 6; ii++) {
+        pref_states[ii] = 0;
+      }
+      // tally up pref states
+      for (device_id in device_pref_states) {
+        pref_states[device_pref_states[device_id]] += 1;
+      }
+
+
+      for (ii = 0; ii < 6; ii++) {
+        entry.push( { timestamp: curr_t, y: pref_states[ii] } );
+      }
+      console.log(JSON.stringify(entry));
+      EPOCH_OBJECTS.area.push(entry);
+    }
+  })();
+
   pubnub.subscribe({
     channel: 'soloChannel',
-    message: function() {
+    message: function(msg) {
+      update_realtime(msg);
       pubnub.history({
         channel: 'soloChannel',
-        count: 50,
+        count: 100,
         callback: update_main
       });
     }
@@ -87,18 +119,17 @@
       type: "time.area",
       data: [
       // because there are six prefernce values
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:1}] }
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
+        { values: [{time:Math.floor(Date.now()/1000), y:0}] }
       ] } )
   };
   pubnub.history({
           channel: 'soloChannel',
-          count: 50,
+          count: 100,
           callback: update_main
         });
-
 </script>
