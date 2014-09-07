@@ -26,7 +26,7 @@
 
 
       for (ii = 0; ii < 6; ii++) {
-        entry.push( { timestamp: curr_t, y: pref_states[ii] } );
+        entry.push( { time: curr_t, y: pref_states[ii] } );
       }
       console.log(JSON.stringify(entry));
       EPOCH_OBJECTS.area.push(entry);
@@ -113,18 +113,19 @@
 
 
   // initializing stuff
+  var start_t = Math.floor(Date.now()/1000);
   var EPOCH_OBJECTS = {
     pie: $("#pie").epoch( { type: "pie", data: [ { label: ":-)", value: 1 } ] } ),
     area: $("#area").epoch( {
       type: "time.area",
       data: [
       // because there are six prefernce values
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] },
-        { values: [{time:Math.floor(Date.now()/1000), y:0}] }
+        { values: [{time:start_t, y:0}] },
+        { values: [{time:start_t, y:0}] },
+        { values: [{time:start_t, y:0}] },
+        { values: [{time:start_t, y:0}] },
+        { values: [{time:start_t, y:0}] },
+        { values: [{time:start_t, y:0}] }
       ] } )
   };
   pubnub.history({
