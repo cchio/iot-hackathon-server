@@ -51,13 +51,16 @@
     var msgs = pubnub_response[0];
     var latest_prefs = compute_latest_prefs(msgs);
     var pref_counts = group_prefs_by_count(latest_prefs);
+    var majority_pref = choose_majority(pref_counts);
     console.log('pref_counts: ' + JSON.stringify(pref_counts));
     console.log('latest_prefs: ' + JSON.stringify(latest_prefs));
+    console.log('latest_prefs: ' + JSON.stringify(latest_prefs));
 
+    console.log('majority_pref: ' + ('' + majority_pref));
     // publish to the channel
     pubnub.publish({
       channel: 'aggrChannel',
-      message: pref_counts 
+      message: ('' + majority_pref)
     });
 
     var pie_data = [];
@@ -67,6 +70,20 @@
     }
     console.log('pie_data: ' + JSON.stringify(pie_data));
     EPOCH_OBJECTS.pie.update(pie_data);
+  }
+
+  function choose_majority(pref_counts) {
+    var majorities = [];
+    var max = Math.max.apply(this, pref_counts);
+    var ii;
+    for (ii = 0; ii < pref_counts.length; ii++) {
+      if (pref_counts[ii] === max) {
+        majorities.push(ii);
+      }
+    }
+
+    console.log('Majorities: ' + JSON.stringify(majorities));
+    return majorities[Math.floor(Math.random()*pref_counts.length)];
   }
 
   function compute_latest_prefs(msgs) {
